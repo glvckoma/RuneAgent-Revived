@@ -1,6 +1,6 @@
 # RuneAgent
 
-A Java agent for intercepting and analyzing network traffic in RuneScape clients.
+A Revival of the RuneAgent Java app for intercepting and analyzing network traffic in RuneScape Private Server clients.
 
 ## Features
 
@@ -8,17 +8,13 @@ A Java agent for intercepting and analyzing network traffic in RuneScape clients
 - **JavaScript Scripting**: Write and execute scripts to interact with the game client
 - **Dark Mode**: Customizable UI with light and dark themes
 - **Script Management**: Save, load, import, and export scripts
-- **Multiple Client Support**: Works with various RuneScape client versions
+- **Multiple Client Support**: Works with various RuneScape Private Server client versions
 
 ## Installation
 
 1. Download the latest release from the [Releases](https://github.com/glvckoma/RuneAgent-Revived/releases) page
 2. Extract the ZIP file to a location of your choice
-3. Run the JAR file using Java:
-
-```bash
-java -jar RuneAgent.jar
-```
+3. Run the JAR file using the .bat file:
 
 ## Usage
 
