@@ -1,0 +1,8 @@
+# Ignore build artifacts but keep dist directory
+/build/classes/
+/build/empty/
+/build/generated-sources/
+/build/built-jar.properties
+
+# Keep dist directory and its contents
+# /dist/

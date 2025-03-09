@@ -147,8 +147,8 @@ public class ThemeManager {
             // Separators (parentheses, brackets, etc.)
             scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.SEPARATOR).foreground = DARK_SEPARATOR;
             
-                    // Make selected text background orange with black text for better visibility
-                    textArea.setSelectionColor(new Color(255, 140, 0)); // Bright orange
+                    // Make selected text background light gray with black text for better visibility
+                    textArea.setSelectionColor(new Color(200, 200, 200)); // Light gray
                     textArea.setSelectedTextColor(Color.BLACK);
         } else {
             // Reset to default colors for light mode
@@ -318,8 +318,8 @@ public class ThemeManager {
                     // Separators (parentheses, brackets, etc.)
                     scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.SEPARATOR).foreground = DARK_SEPARATOR;
                     
-                    // Make selected text background orange with black text for better visibility
-                    textArea.setSelectionColor(new Color(255, 140, 0)); // Bright orange
+                    // Make selected text background light gray with black text for better visibility
+                    textArea.setSelectionColor(new Color(200, 200, 200)); // Light gray
                     textArea.setSelectedTextColor(Color.BLACK);
                 } else {
                     // Reset to default colors for light mode
