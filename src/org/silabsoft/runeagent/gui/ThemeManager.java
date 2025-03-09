@@ -117,48 +117,20 @@ public class ThemeManager {
         
         System.out.println("Applying " + (isDarkMode ? "dark" : "light") + " syntax highlighting");
         
-        // Set background and foreground colors
-        textArea.setBackground(isDarkMode ? DARK_TEXT_AREA_BG : Color.WHITE);
-        textArea.setForeground(isDarkMode ? DARK_FOREGROUND : Color.BLACK);
+        // Always use white background for script area, but adjust text color based on mode
+        textArea.setBackground(Color.WHITE);
+        textArea.setForeground(isDarkMode ? Color.BLACK : Color.BLACK);
         
         // Get the syntax scheme for this text area
         org.fife.ui.rsyntaxtextarea.SyntaxScheme scheme = textArea.getSyntaxScheme();
         
-        if (isDarkMode) {
-            // Apply dark mode syntax highlighting
-            
-            // Comments
-            scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.COMMENT_DOCUMENTATION).foreground = DARK_COMMENT;
-            scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.COMMENT_EOL).foreground = DARK_COMMENT;
-            scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.COMMENT_MULTILINE).foreground = DARK_COMMENT;
-            
-            // Keywords
-            scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.RESERVED_WORD).foreground = DARK_KEYWORD;
-            scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.RESERVED_WORD_2).foreground = DARK_KEYWORD;
-            
-            // Literals
-            scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.LITERAL_STRING_DOUBLE_QUOTE).foreground = DARK_STRING;
-            scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.LITERAL_CHAR).foreground = DARK_STRING;
-            scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.LITERAL_NUMBER_DECIMAL_INT).foreground = DARK_NUMBER;
-            scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.LITERAL_NUMBER_FLOAT).foreground = DARK_NUMBER;
-            scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.LITERAL_NUMBER_HEXADECIMAL).foreground = DARK_NUMBER;
-            
-            // Operators and identifiers
-            scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.OPERATOR).foreground = DARK_OPERATOR;
-            scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.IDENTIFIER).foreground = DARK_IDENTIFIER;
-            scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.FUNCTION).foreground = DARK_FUNCTION;
-            
-            // Separators (parentheses, brackets, etc.)
-            scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.SEPARATOR).foreground = DARK_SEPARATOR;
-        } else {
-            // Reset to default colors for light mode
-            textArea.restoreDefaultSyntaxScheme();
-            scheme = textArea.getSyntaxScheme(); // Get the fresh scheme
-        }
+        // Always use the default syntax highlighting since we're using a white background
+        textArea.restoreDefaultSyntaxScheme();
+        scheme = textArea.getSyntaxScheme(); // Get the fresh scheme
         
         // Apply the updated scheme
         textArea.setSyntaxScheme(scheme);
-        textArea.setCaretColor(isDarkMode ? Color.WHITE : Color.BLACK);
+        textArea.setCaretColor(Color.BLACK); // Always use black caret with white background
         
         // Set selection colors - always use light gray background with black text for better visibility
         textArea.setSelectionColor(SELECTION_COLOR);
