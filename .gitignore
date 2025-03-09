@@ -3,5 +3,10 @@
 /build/empty/
 /build/generated-sources/
 /build/built-jar.properties
+build/built-jar.properties
+build/classes/org/silabsoft/runeagent/gui/ThemeManager.class
+
 # Keep dist directory and its contents
 # /dist/
+# But ignore specific files that change frequently
+dist/RuneAgent.jar
