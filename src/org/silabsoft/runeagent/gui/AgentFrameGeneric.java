@@ -43,6 +43,30 @@ public class AgentFrameGeneric extends javax.swing.JFrame implements RuneAgentEv
     private JButton checkUpdateButton;
     private JLabel versionLabel;
     
+    // Track dark mode state
+    private boolean isDarkMode = false;
+    
+    // Store all log messages for rebuilding the log pane when theme changes
+    private static class LogEntry {
+        private final String timestamp;
+        private final String message;
+        
+        public LogEntry(String timestamp, String message) {
+            this.timestamp = timestamp;
+            this.message = message;
+        }
+        
+        public String getTimestamp() {
+            return timestamp;
+        }
+        
+        public String getMessage() {
+            return message;
+        }
+    }
+    
+    private final java.util.List<LogEntry> logEntries = new java.util.ArrayList<>();
+    
     public AgentFrameGeneric() {
         initComponents();
         
@@ -200,7 +224,7 @@ public class AgentFrameGeneric extends javax.swing.JFrame implements RuneAgentEv
         darkModeToggle = new javax.swing.JToggleButton();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
+        jTextPane1 = new javax.swing.JTextPane();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
 
@@ -209,9 +233,8 @@ public class AgentFrameGeneric extends javax.swing.JFrame implements RuneAgentEv
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Rune Agent Log:"));
 
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jScrollPane1.setViewportView(jTextArea1);
+        jTextPane1.setEditable(false); // Prevent typing in Rune Agent Log
+        jScrollPane1.setViewportView(jTextPane1);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -313,7 +336,7 @@ public class AgentFrameGeneric extends javax.swing.JFrame implements RuneAgentEv
     }//GEN-LAST:event_jMenu1MouseClicked
 
     private void darkModeToggleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_darkModeToggleActionPerformed
-        boolean isDarkMode = darkModeToggle.isSelected();
+        this.isDarkMode = darkModeToggle.isSelected();
         
         // Use the ThemeManager to apply the theme
         String result = ThemeManager.applyTheme(this, isDarkMode);
@@ -331,8 +354,48 @@ public class AgentFrameGeneric extends javax.swing.JFrame implements RuneAgentEv
             ThemeManager.applySyntaxHighlighting(outStreamPanel.getScriptArea(), isDarkMode);
         }
         
+        // Apply theme to the Rune Agent Log JTextPane
+        ThemeManager.applyTextPaneTheme(jTextPane1, isDarkMode);
+        
+        // Update the styles in the JTextPane for proper coloring in the current theme
+        updateLogStyles(isDarkMode);
+        
+        // Rebuild the log pane with the new theme
+        rebuildLogPane();
+        
+        // Log the theme change message (add to log entries and display)
         logString(result);
     }//GEN-LAST:event_darkModeToggleActionPerformed
+    
+    /**
+     * Rebuilds the entire log pane with the current theme
+     */
+    private void rebuildLogPane() {
+        // Clear the text pane
+        jTextPane1.setText("");
+        
+        // Re-add all messages with current styling
+        for (LogEntry entry : logEntries) {
+            addStyledLogMessage(entry.getTimestamp(), entry.getMessage());
+        }
+    }
+    
+    /**
+     * Updates the text styles in the log JTextPane based on the current theme
+     * 
+     * @param isDarkMode Whether dark mode is enabled
+     */
+    private void updateLogStyles(boolean isDarkMode) {
+        // Create styles with different colors
+        javax.swing.text.Style defaultStyle = jTextPane1.getStyle("Default");
+        if (defaultStyle == null) {
+            defaultStyle = jTextPane1.addStyle("Default", null);
+        }
+        javax.swing.text.StyleConstants.setForeground(defaultStyle, 
+            isDarkMode ? new java.awt.Color(230, 230, 230) : java.awt.Color.BLACK);
+        
+        // The other styles (Event, Transformer, Found, Error) are handled by ThemeManager.applyTextPaneTheme
+    }
     
     private void jMenu1MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jMenu1MouseEntered
         // Change appearance on hover
@@ -383,8 +446,78 @@ public class AgentFrameGeneric extends javax.swing.JFrame implements RuneAgentEv
 
     public void logString(String o) {
         Timestamp currentTimestamp = new java.sql.Timestamp(System.currentTimeMillis());
-        jTextArea1.append("[" + currentTimestamp + "] - " + o + "\n");
-        jTextArea1.setCaretPosition(jTextArea1.getText().length());
+        String timestamp = "[" + currentTimestamp + "] - ";
+        
+        // Store the message in our list
+        logEntries.add(new LogEntry(timestamp, o));
+        
+        // Add the styled message to the text pane
+        addStyledLogMessage(timestamp, o);
+    }
+    
+    /**
+     * Adds a styled message to the text pane
+     * 
+     * @param timestamp The timestamp string
+     * @param message The message to add
+     */
+    private void addStyledLogMessage(String timestamp, String message) {
+        // Create a styled document
+        javax.swing.text.StyledDocument doc = jTextPane1.getStyledDocument();
+        
+        // Create styles with different colors based on current theme
+        javax.swing.text.Style defaultStyle = jTextPane1.addStyle("Default", null);
+        javax.swing.text.StyleConstants.setForeground(defaultStyle, 
+            isDarkMode ? new java.awt.Color(230, 230, 230) : java.awt.Color.BLACK);
+        
+        javax.swing.text.Style eventStyle = jTextPane1.addStyle("Event", null);
+        javax.swing.text.StyleConstants.setForeground(eventStyle, 
+            isDarkMode ? new java.awt.Color(100, 255, 100) : new java.awt.Color(0, 128, 0)); // Green for events
+        
+        javax.swing.text.Style transformerStyle = jTextPane1.addStyle("Transformer", null);
+        javax.swing.text.StyleConstants.setForeground(transformerStyle, 
+            isDarkMode ? new java.awt.Color(100, 100, 255) : new java.awt.Color(0, 0, 200)); // Blue for transformers
+        
+        javax.swing.text.Style foundStyle = jTextPane1.addStyle("Found", null);
+        javax.swing.text.StyleConstants.setForeground(foundStyle, 
+            isDarkMode ? new java.awt.Color(200, 100, 255) : new java.awt.Color(128, 0, 128)); // Purple for "Found" messages
+        
+        javax.swing.text.Style errorStyle = jTextPane1.addStyle("Error", null);
+        javax.swing.text.StyleConstants.setForeground(errorStyle, 
+            isDarkMode ? new java.awt.Color(255, 100, 100) : java.awt.Color.RED); // Red for errors
+        
+        try {
+            // Determine the style based on the content
+            javax.swing.text.Style style = defaultStyle;
+            
+            if (message.contains("AGENT_") || message.contains("_ADDED")) {
+                style = eventStyle;
+            } else if (message.startsWith("Transformer =>")) {
+                if (message.contains("Error") || message.contains("Failed") || message.contains("Exception")) {
+                    style = errorStyle;
+                } else if (message.contains("Found:")) {
+                    style = foundStyle;
+                } else {
+                    style = transformerStyle;
+                }
+            } else if (message.contains("Error") || message.contains("Failed") || message.contains("Exception")) {
+                style = errorStyle;
+            }
+            
+            // Insert the timestamp with default style
+            doc.insertString(doc.getLength(), timestamp, defaultStyle);
+            
+            // Insert the message with the appropriate style
+            doc.insertString(doc.getLength(), message + "\n", style);
+            
+            // Scroll to the bottom
+            jTextPane1.setCaretPosition(doc.getLength());
+        } catch (javax.swing.text.BadLocationException e) {
+            // Fallback to simple append if styling fails
+            System.err.println("Error styling log message: " + e.getMessage());
+            jTextPane1.setText(jTextPane1.getText() + timestamp + message + "\n");
+            jTextPane1.setCaretPosition(jTextPane1.getText().length());
+        }
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -395,7 +528,7 @@ public class AgentFrameGeneric extends javax.swing.JFrame implements RuneAgentEv
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTabbedPane jTabbedPane1;
-    private javax.swing.JTextArea jTextArea1;
+    private javax.swing.JTextPane jTextPane1;
     private javax.swing.JPanel settingsPanel;
     // End of variables declaration//GEN-END:variables
 

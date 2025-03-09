@@ -15,6 +15,7 @@ import javax.swing.JTextArea;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.silabsoft.runeagent.hook.ByteStreamMeta;
+import org.silabsoft.runeagent.hook.ByteStreamMetaWrapper;
 
 /**
  *
@@ -107,6 +108,7 @@ public class GenericOutStreamPanel extends javax.swing.JPanel {
 
         outputStreamLog.setColumns(20);
         outputStreamLog.setRows(5);
+        outputStreamLog.setEditable(false); // Prevent typing in Incoming Packets
         jScrollPane1.setViewportView(outputStreamLog);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -127,6 +129,7 @@ public class GenericOutStreamPanel extends javax.swing.JPanel {
 
         eventLog.setColumns(20);
         eventLog.setRows(5);
+        eventLog.setEditable(false); // Prevent typing in Event Log
         jScrollPane2.setViewportView(eventLog);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -295,7 +298,19 @@ public class GenericOutStreamPanel extends javax.swing.JPanel {
             int index = jList1.locationToIndex(evt.getPoint());
             Object o = jList1.getModel().getElementAt(index);
             if (o != null) {
-                if (o instanceof ByteStreamMeta) {
+                if (o instanceof ByteStreamMetaWrapper) {
+                    ByteStreamMetaWrapper wrapper = (ByteStreamMetaWrapper) o;
+                    ByteStreamMeta bsm = wrapper.getMeta();
+                    
+                    // Only insert code if the method is hooked
+                    if (wrapper.isHooked()) {
+                        scriptArea.insert("stream." + bsm.methodName() + "(" + bsm.parameters() + ");\n", scriptArea.getCaretPosition());
+                    } else {
+                        // Show a message in the event log that the method is not hooked
+                        logEvent(eventLog, "Cannot use " + bsm.methodName() + " - method is not hooked");
+                    }
+                } else if (o instanceof ByteStreamMeta) {
+                    // Keep backward compatibility with ByteStreamMeta
                     ByteStreamMeta bsm = (ByteStreamMeta) o;
                     scriptArea.insert("stream." + bsm.methodName() + "(" + bsm.parameters() + ");\n", scriptArea.getCaretPosition());
                 }
@@ -401,17 +416,70 @@ public class GenericOutStreamPanel extends javax.swing.JPanel {
         this.outStreamObject = o;
         this.engine.put("stream", o);
         DefaultListModel model = new DefaultListModel();
+        
+        // Collect all ByteStreamMeta annotations from interfaces
         for (Class i : o.getClass().getInterfaces()) {
             for (Method m : i.getMethods()) {
                 ByteStreamMeta bsm = m.getAnnotation(ByteStreamMeta.class);
                 if (bsm != null) {
-                    model.addElement(bsm);
+                    // Check if the method is actually implemented (hooked)
+                    boolean hooked = isMethodHooked(o, m);
+                    model.addElement(new ByteStreamMetaWrapper(bsm, hooked));
                 }
             }
         }
+        
         jList1.setModel(model);
         jList1.setCellRenderer(new ByteStreamMetaJListCellRenderer());
         logEvent(eventLog, "Outstream object set.");
+    }
+    
+    /**
+     * Checks if a method is actually implemented (hooked) by trying to invoke it
+     * with dummy parameters and catching exceptions
+     * 
+     * @param obj The object to check
+     * @param method The method to check
+     * @return true if the method is hooked, false otherwise
+     */
+    private boolean isMethodHooked(Object obj, Method method) {
+        try {
+            // Create dummy parameters based on parameter types
+            Object[] params = new Object[method.getParameterCount()];
+            Class<?>[] paramTypes = method.getParameterTypes();
+            
+            for (int i = 0; i < params.length; i++) {
+                // Provide default values based on parameter type
+                if (paramTypes[i] == int.class) {
+                    params[i] = 0;
+                } else if (paramTypes[i] == long.class) {
+                    params[i] = 0L;
+                } else if (paramTypes[i] == String.class) {
+                    params[i] = "";
+                } else {
+                    params[i] = null;
+                }
+            }
+            
+            // Try to invoke the method with accessible flag set
+            method.setAccessible(true);
+            method.invoke(obj, params);
+            
+            // If we get here, the method is implemented
+            return true;
+        } catch (Exception e) {
+            // Check the exception type
+            Throwable cause = e.getCause();
+            
+            // If it's UnsupportedOperationException, the method is not hooked
+            if (cause instanceof UnsupportedOperationException) {
+                return false;
+            }
+            
+            // For other exceptions, we assume the method is hooked but threw an exception
+            // for other reasons (like invalid parameters)
+            return true;
+        }
     }
 
     public void logEvent(JTextArea area, String o) {

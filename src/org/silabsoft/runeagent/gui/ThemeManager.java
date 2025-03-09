@@ -246,6 +246,57 @@ public class ThemeManager {
      * This ensures components that might not update properly through the Look and Feel
      * are explicitly updated
      */
+    /**
+     * Applies theme colors to a JTextPane with styled text
+     * 
+     * @param textPane The JTextPane to update
+     * @param isDarkMode Whether dark mode is enabled
+     */
+    public static void applyTextPaneTheme(javax.swing.JTextPane textPane, boolean isDarkMode) {
+        if (textPane == null) {
+            return;
+        }
+        
+        // Set background color
+        textPane.setBackground(isDarkMode ? DARK_TEXT_AREA_BG : LIGHT_TEXT_AREA_BG);
+        
+        // Get the document
+        javax.swing.text.StyledDocument doc = textPane.getStyledDocument();
+        
+        // Update default style color
+        javax.swing.text.Style defaultStyle = textPane.getStyle("Default");
+        if (defaultStyle != null) {
+            javax.swing.text.StyleConstants.setForeground(defaultStyle, isDarkMode ? DARK_FOREGROUND : LIGHT_FOREGROUND);
+        }
+        
+        // Create or update other styles with appropriate colors for the theme
+        updateTextPaneStyle(textPane, "Event", new java.awt.Color(0, 128, 0), new java.awt.Color(100, 255, 100), isDarkMode);
+        updateTextPaneStyle(textPane, "Transformer", new java.awt.Color(0, 0, 200), new java.awt.Color(100, 100, 255), isDarkMode);
+        updateTextPaneStyle(textPane, "Found", new java.awt.Color(128, 0, 128), new java.awt.Color(200, 100, 255), isDarkMode);
+        updateTextPaneStyle(textPane, "Error", java.awt.Color.RED, new java.awt.Color(255, 100, 100), isDarkMode);
+        
+        // Force repaint
+        textPane.repaint();
+    }
+    
+    /**
+     * Updates or creates a style in a JTextPane with appropriate colors for the current theme
+     * 
+     * @param textPane The JTextPane to update
+     * @param styleName The name of the style to update
+     * @param lightModeColor The color to use in light mode
+     * @param darkModeColor The color to use in dark mode
+     * @param isDarkMode Whether dark mode is enabled
+     */
+    private static void updateTextPaneStyle(javax.swing.JTextPane textPane, String styleName, 
+                                           Color lightModeColor, Color darkModeColor, boolean isDarkMode) {
+        javax.swing.text.Style style = textPane.getStyle(styleName);
+        if (style == null) {
+            style = textPane.addStyle(styleName, null);
+        }
+        javax.swing.text.StyleConstants.setForeground(style, isDarkMode ? darkModeColor : lightModeColor);
+    }
+    
     private static void updateComponentsRecursively(Container container, boolean isDarkMode) {
         for (Component component : container.getComponents()) {
             // Explicitly set colors for certain components
@@ -255,6 +306,9 @@ public class ThemeManager {
             } else if (component instanceof JTextArea) {
                 component.setBackground(isDarkMode ? DARK_TEXT_AREA_BG : LIGHT_TEXT_AREA_BG);
                 component.setForeground(isDarkMode ? DARK_FOREGROUND : LIGHT_FOREGROUND);
+            } else if (component instanceof javax.swing.JTextPane) {
+                // Apply theme to JTextPane
+                applyTextPaneTheme((javax.swing.JTextPane) component, isDarkMode);
             } else if (component instanceof org.fife.ui.rsyntaxtextarea.RSyntaxTextArea) {
                 // Apply syntax highlighting to RSyntaxTextArea
                 org.fife.ui.rsyntaxtextarea.RSyntaxTextArea textArea = 

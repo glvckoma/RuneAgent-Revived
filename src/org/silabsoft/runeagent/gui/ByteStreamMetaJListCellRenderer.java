@@ -5,10 +5,12 @@
  */
 package org.silabsoft.runeagent.gui;
 
+import java.awt.Color;
 import java.awt.Component;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 import org.silabsoft.runeagent.hook.ByteStreamMeta;
+import org.silabsoft.runeagent.hook.ByteStreamMetaWrapper;
 
 /**
  *
@@ -22,7 +24,24 @@ public class ByteStreamMetaJListCellRenderer extends DefaultListCellRenderer {
             boolean isSelected,
             boolean cellHasFocus) {
         super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-        if (value instanceof ByteStreamMeta) {
+        
+        if (value instanceof ByteStreamMetaWrapper) {
+            ByteStreamMetaWrapper wrapper = (ByteStreamMetaWrapper) value;
+            setText(wrapper.getDisplayText());
+            
+            // Set color based on hook status (if not selected)
+            if (!isSelected) {
+                if (wrapper.isHooked()) {
+                    setForeground(new Color(0, 150, 0)); // Green for hooked
+                } else {
+                    setForeground(new Color(200, 0, 0)); // Red for not hooked
+                }
+            }
+            
+            ByteStreamMeta bsm = wrapper.getMeta();
+            setToolTipText(bsm.methodName());
+        } else if (value instanceof ByteStreamMeta) {
+            // Keep backward compatibility with ByteStreamMeta
             ByteStreamMeta bsm = (ByteStreamMeta) value;
             if (bsm.displayName() == null) {
                 setText(bsm.methodName());
@@ -31,6 +50,7 @@ public class ByteStreamMetaJListCellRenderer extends DefaultListCellRenderer {
             }
             setToolTipText(bsm.methodName());
         }
+        
         return this;
     }
 }
