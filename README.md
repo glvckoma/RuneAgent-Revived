@@ -35,6 +35,15 @@ The RuneAgent-bld directory contains:
 1. Ensure Java is installed and available in your system PATH
 2. Double-click the run.bat file to start RuneAgent with the RuneScape client
 
+## Config Creation
+
+This needs to be tackled to match the specific runescape private server you are testing.
+
+1. Decompile & analyze bytecote
+2. Identify files that match Buffer(Stream)/Client/IsaacRandomGEN
+3. Identify the hooks/methods.
+4. Update the config file to match.
+
 
 ### Writing Scripts
 
