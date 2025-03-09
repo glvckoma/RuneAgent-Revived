@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.10.15
+Created-By: 17.0.8+9-LTS-211 (Oracle Corporation)
+Premain-Class: org.silabsoft.runeagent.Premain
+

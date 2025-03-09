@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="RuneAgent" default="default" basedir=".">
+    <description>Builds, tests, and runs the project RuneAgent.</description>
+    <import file="nbproject/build-impl.xml"/>
+ 
+<target name="-pre-init">
+
+   <manifest file="MANIFEST.MF">
+      <attribute name="Premain-Class" value="org.silabsoft.runeagent.Premain" />
+   </manifest>
+
+</target>
+
+</project>
