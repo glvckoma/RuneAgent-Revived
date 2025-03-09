@@ -46,6 +46,10 @@ public class ThemeManager {
     private static final Color DARK_FUNCTION = new Color(255, 204, 204);      // Light pink
     private static final Color DARK_SEPARATOR = new Color(255, 200, 200);     // Light pink for parentheses
     
+    // Selection colors
+    private static final Color SELECTION_COLOR = new Color(200, 200, 200);    // Light gray for selection
+    private static final Color SELECTED_TEXT_COLOR = Color.BLACK;             // Black text for selected text
+    
     /**
      * Applies the specified theme to the application
      * 
@@ -146,10 +150,6 @@ public class ThemeManager {
             
             // Separators (parentheses, brackets, etc.)
             scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.SEPARATOR).foreground = DARK_SEPARATOR;
-            
-                    // Make selected text background light gray with black text for better visibility
-                    textArea.setSelectionColor(new Color(200, 200, 200)); // Light gray
-                    textArea.setSelectedTextColor(Color.BLACK);
         } else {
             // Reset to default colors for light mode
             textArea.restoreDefaultSyntaxScheme();
@@ -159,6 +159,10 @@ public class ThemeManager {
         // Apply the updated scheme
         textArea.setSyntaxScheme(scheme);
         textArea.setCaretColor(isDarkMode ? Color.WHITE : Color.BLACK);
+        
+        // Set selection colors - always use light gray background with black text for better visibility
+        textArea.setSelectionColor(SELECTION_COLOR);
+        textArea.setSelectedTextColor(SELECTED_TEXT_COLOR);
         
         // Force repaint to ensure changes are visible
         textArea.repaint();
@@ -284,51 +288,8 @@ public class ThemeManager {
                 org.fife.ui.rsyntaxtextarea.RSyntaxTextArea textArea = 
                         (org.fife.ui.rsyntaxtextarea.RSyntaxTextArea) component;
                 
-                // Set background and foreground colors
-                textArea.setBackground(isDarkMode ? DARK_TEXT_AREA_BG : LIGHT_TEXT_AREA_BG);
-                textArea.setForeground(isDarkMode ? DARK_FOREGROUND : LIGHT_FOREGROUND);
-                
-                // Get the syntax scheme for this text area
-                org.fife.ui.rsyntaxtextarea.SyntaxScheme scheme = textArea.getSyntaxScheme();
-                
-                if (isDarkMode) {
-                    // Apply dark mode syntax highlighting
-                    
-                    // Comments
-                    scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.COMMENT_DOCUMENTATION).foreground = DARK_COMMENT;
-                    scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.COMMENT_EOL).foreground = DARK_COMMENT;
-                    scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.COMMENT_MULTILINE).foreground = DARK_COMMENT;
-                    
-                    // Keywords
-                    scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.RESERVED_WORD).foreground = DARK_KEYWORD;
-                    scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.RESERVED_WORD_2).foreground = DARK_KEYWORD;
-                    
-                    // Literals
-                    scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.LITERAL_STRING_DOUBLE_QUOTE).foreground = DARK_STRING;
-                    scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.LITERAL_CHAR).foreground = DARK_STRING;
-                    scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.LITERAL_NUMBER_DECIMAL_INT).foreground = DARK_NUMBER;
-                    scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.LITERAL_NUMBER_FLOAT).foreground = DARK_NUMBER;
-                    scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.LITERAL_NUMBER_HEXADECIMAL).foreground = DARK_NUMBER;
-                    
-                    // Operators and identifiers
-                    scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.OPERATOR).foreground = DARK_OPERATOR;
-                    scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.IDENTIFIER).foreground = DARK_IDENTIFIER;
-                    scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.FUNCTION).foreground = DARK_FUNCTION;
-                    
-                    // Separators (parentheses, brackets, etc.)
-                    scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.SEPARATOR).foreground = DARK_SEPARATOR;
-                    
-                    // Make selected text background light gray with black text for better visibility
-                    textArea.setSelectionColor(new Color(200, 200, 200)); // Light gray
-                    textArea.setSelectedTextColor(Color.BLACK);
-                } else {
-                    // Reset to default colors for light mode
-                    textArea.restoreDefaultSyntaxScheme();
-                }
-                
-                // Apply the updated scheme
-                textArea.setSyntaxScheme(scheme);
-                textArea.setCaretColor(isDarkMode ? Color.WHITE : Color.BLACK);
+                // Apply syntax highlighting
+                applySyntaxHighlighting(textArea, isDarkMode);
             }
             
             // Force update of component UI if it's a Swing component

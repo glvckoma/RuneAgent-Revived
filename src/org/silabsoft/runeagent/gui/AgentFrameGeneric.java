@@ -7,9 +7,16 @@ package org.silabsoft.runeagent.gui;
 
 import java.awt.Component;
 import java.awt.Desktop;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.sql.Timestamp;
 import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import org.silabsoft.runeagent.RuneAgent;
 import org.silabsoft.runeagent.event.RuneAgentEvent;
 import org.silabsoft.runeagent.event.RuneAgentEventTypes;
@@ -32,12 +39,124 @@ public class AgentFrameGeneric extends javax.swing.JFrame implements RuneAgentEv
     private GenericOutStreamPanel outStreamPanel;
     private ScriptsPanel scriptsPanel;
     
+    // Update checker components
+    private JButton checkUpdateButton;
+    private JLabel versionLabel;
+    
     public AgentFrameGeneric() {
         initComponents();
+        
+        // Add version label and update button to settings panel
+        setupUpdateComponents();
         
         // Add Settings tab at the end
         jTabbedPane1.addTab("Settings", settingsPanel);
         settingsTabAdded = true;
+    }
+    
+    /**
+     * Sets up the version label and update checker button
+     */
+    private void setupUpdateComponents() {
+        // Create version label
+        versionLabel = new JLabel("Current Version: " + RuneAgent.VERSION);
+        versionLabel.setBounds(20, 60, 200, 25);
+        settingsPanel.add(versionLabel);
+        
+        // Create update checker button
+        checkUpdateButton = new JButton("Check for Updates");
+        checkUpdateButton.setBounds(20, 90, 150, 25);
+        checkUpdateButton.addActionListener(evt -> checkForUpdates());
+        settingsPanel.add(checkUpdateButton);
+    }
+    
+    /**
+     * Checks for updates from the GitHub repository
+     */
+    private void checkForUpdates() {
+        new Thread(() -> {
+            try {
+                logString("Checking for updates...");
+                
+                // GitHub API URL for the latest release
+                String apiUrl = "https://api.github.com/repos/glvckoma/RuneAgent-Revived/releases/latest";
+                
+                URL url = new URL(apiUrl);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("GET");
+                connection.setRequestProperty("Accept", "application/vnd.github.v3+json");
+                
+                // Check if the request was successful
+                if (connection.getResponseCode() == 200) {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    StringBuilder response = new StringBuilder();
+                    String line;
+                    
+                    while ((line = reader.readLine()) != null) {
+                        response.append(line);
+                    }
+                    reader.close();
+                    
+                    // Parse the response to get the latest version
+                    String responseStr = response.toString();
+                    
+                    // Extract the tag_name (version) from the response
+                    int tagStart = responseStr.indexOf("\"tag_name\":\"") + 12;
+                    int tagEnd = responseStr.indexOf("\"", tagStart);
+                    
+                    if (tagStart > 12 && tagEnd > tagStart) {
+                        String latestVersion = responseStr.substring(tagStart, tagEnd);
+                        
+                        // Remove 'v' prefix if present
+                        if (latestVersion.startsWith("v")) {
+                            latestVersion = latestVersion.substring(1);
+                        }
+                        
+                        // Compare versions
+                        try {
+                            double currentVersion = RuneAgent.VERSION;
+                            double latestVersionNum = Double.parseDouble(latestVersion);
+                            
+                            if (latestVersionNum > currentVersion) {
+                                // New version available
+                                int option = JOptionPane.showConfirmDialog(
+                                    this,
+                                    "A new version (" + latestVersion + ") is available!\nWould you like to visit the download page?",
+                                    "Update Available",
+                                    JOptionPane.YES_NO_OPTION,
+                                    JOptionPane.INFORMATION_MESSAGE
+                                );
+                                
+                                if (option == JOptionPane.YES_OPTION) {
+                                    // Open the GitHub releases page
+                                    Desktop.getDesktop().browse(new URI(RuneAgent.GITHUB_REPO + "/releases/latest"));
+                                }
+                            } else {
+                                // Already on the latest version
+                                JOptionPane.showMessageDialog(
+                                    this,
+                                    "You are already using the latest version (" + currentVersion + ").",
+                                    "No Updates Available",
+                                    JOptionPane.INFORMATION_MESSAGE
+                                );
+                            }
+                        } catch (NumberFormatException e) {
+                            logString("Error parsing version number: " + e.getMessage());
+                        }
+                    } else {
+                        logString("Could not find version information in the response");
+                    }
+                } else {
+                    logString("Failed to check for updates. Response code: " + connection.getResponseCode());
+                }
+                
+                connection.disconnect();
+                
+            } catch (Exception e) {
+                logString("Error checking for updates: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }).start();
     }
     
     /**
