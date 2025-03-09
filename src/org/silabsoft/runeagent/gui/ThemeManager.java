@@ -319,7 +319,7 @@ public class ThemeManager {
                     scheme.getStyle(org.fife.ui.rsyntaxtextarea.TokenTypes.SEPARATOR).foreground = DARK_SEPARATOR;
                     
                     // Make selected text background yellow with black text for better visibility
-                    textArea.setSelectionColor(new Color(255, 255, 150)); // Light yellow
+                    textArea.setSelectionColor(new Color(255, 220, 0)); // More opaque yellow
                     textArea.setSelectedTextColor(Color.BLACK);
                 } else {
                     // Reset to default colors for light mode
