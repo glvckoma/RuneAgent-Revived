@@ -14,9 +14,26 @@ A Revival of the RuneAgent Java app for intercepting and analyzing network traff
 
 1. Download the latest release from the [Releases](https://github.com/glvckoma/RuneAgent-Revived/releases) page
 2. Extract the ZIP file to a location of your choice
-3. Run the JAR file using the .bat file:
+3. Run the application using the provided run.bat file
+
+## Directory Structure
+
+The RuneAgent-bld directory contains:
+
+- **RuneAgent.jar**: The main application JAR file
+- **client.jar**: The RuneScape client JAR file
+- **run.bat**: Batch file to run the application
+- **config.js**: Configuration script for RuneAgent
+- **default-config/**: Directory containing default configuration files
+- **lib/**: Directory containing required libraries
+- **scripts/**: Directory containing example and user scripts
 
 ## Usage
+
+### Running the Application
+
+1. Ensure Java is installed and available in your system PATH
+2. Double-click the run.bat file to start RuneAgent with the RuneScape client
 
 ### Attaching to a Client
 
