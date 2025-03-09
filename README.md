@@ -35,12 +35,15 @@ The RuneAgent-bld directory contains:
 1. Ensure Java is installed and available in your system PATH
 2. Double-click the run.bat file to start RuneAgent with the RuneScape client
 
-### Attaching to a Client
+## Config Creation
 
-1. Start RuneAgent
-2. Launch your RuneScape client
-3. In RuneAgent, select the appropriate client version
-4. Click "Attach" to connect to the client
+This needs to be tackled to match the specific runescape private server you are testing.
+
+1. Decompile & analyze bytecote
+2. Identify files that match Buffer(Stream)/Client/IsaacRandomGEN
+3. Identify the hooks/methods.
+4. Update the config file to match.
+
 
 ### Writing Scripts
 
@@ -49,16 +52,6 @@ RuneAgent uses JavaScript for scripting. You can write scripts to:
 - Analyze packet data
 - Automate client interactions
 - Monitor game events
-
-Example script:
-
-```javascript
-// Log all incoming packets
-stream.onPacket = function(packet) {
-    console.log("Received packet: " + packet.opcode);
-    return packet; // Return the packet to allow it to be processed
-};
-```
 
 ### Managing Scripts
 
@@ -90,15 +83,7 @@ cd RuneAgent-Revived
 ant clean jar
 ```
 
-4. The built JAR file will be in the `dist` directory
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+4. The built runagent.JAR file will be in the `dist` directory
 
 ## Acknowledgments
 
